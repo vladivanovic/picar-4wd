@@ -5,10 +5,12 @@ from codecs import open
 from os import path
 from os import system
 from os import listdir
+from os import getcwd
 import sys
 import tty
 import termios
 import asyncio
+import getpass
 
 errors = []
 
@@ -151,6 +153,7 @@ class Config(object):
         except Exception as e:
             return -1, e
 
+
 def install():
     print("Install dependency")
     do(msg="update apt-get",
@@ -164,6 +167,8 @@ def install():
     do(msg="install i2c-tools",
         cmd='run_command("sudo apt-get install i2c-tools -y")')
 
+    workingdir = getcwd()
+    workhead, worktail = path.split(workingdir)
 
     print("Setup interfaces")
     do(msg="turn on I2C",
@@ -171,13 +176,13 @@ def install():
     do(msg="Add I2C module",
         cmd='Modules().set("i2c-dev")') 
 
-    if ".picar-4wd" not in listdir("/home/pi"):
+    if ".picar-4wd" not in listdir(f"{workhead}"):
         do(msg="create .picar-4wd directory",
-            cmd='run_command("sudo mkdir /home/pi/.picar-4wd/")') 
+            cmd=f'run_command("sudo mkdir {workhead}/.picar-4wd/")') 
     do(msg="copy picar-4wd-config",
-        cmd='run_command("sudo cp ./data/config /home/pi/.picar-4wd/")')
+        cmd=f'run_command("sudo cp ./data/config {workhead}/.picar-4wd/")')
     do(msg="change directory owner",
-        cmd='run_command("sudo chown -R pi:pi /home/pi/.picar-4wd/")')
+        cmd=f'run_command("sudo chown -R vlad:vlad {workhead}/.picar-4wd/")')
 
     print("Setup picar-4wd web-example service") 
     do(msg="copy picar-4wd web-example file",
